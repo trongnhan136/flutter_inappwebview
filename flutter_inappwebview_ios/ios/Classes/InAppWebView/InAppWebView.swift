@@ -589,6 +589,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         configuration.userContentController.add(self, name: "onWebMessagePortMessageReceived")
         configuration.userContentController.removeScriptMessageHandler(forName: "onWebMessageListenerPostMessageReceived")
         configuration.userContentController.add(self, name: "onWebMessageListenerPostMessageReceived")
+        configuration.userContentController.removeScriptMessageHandler(forName: "observe")
+        configuration.userContentController.add(self, name: "observe")
         configuration.userContentController.addUserOnlyScripts(initialUserScripts)
         configuration.userContentController.sync(scriptMessageHandler: self)
     }
@@ -2793,7 +2795,38 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 //        channel?.invokeMethod("onContextMenuWillPresentForElement", arguments: arguments)
 //    }
     
+    func wrapToJsonString(_ input: String) -> String {
+        let list: [String] = [input]
+        if let jsonData = try? JSONSerialization.data(withJSONObject: list, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            return jsonString
+        }
+        return "[]"
+    }
+    
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        
+        if(message.name == "observe"){
+            if var body = message.body as? String {
+                body = wrapToJsonString(body)
+                let callback = WebViewChannelDelegate.CallJsHandlerCallback()
+                callback.defaultBehaviour = { [weak self] (response: Any?) in
+                    print(">>>>>>>> \(response)")
+                }
+                callback.error = { [weak self] (code: String, message: String?, details: Any?) in
+                    print(">>>>>>>> \(code) - \(message) - \(details)")
+                }
+                
+                var webView = self
+                if let channelDelegate = webView.channelDelegate {
+                    channelDelegate.onCallJsHandler(handlerName: "observe", args: body, callback: callback)
+                }
+            }
+                
+            return
+        }
+        
+        
         guard let body = message.body as? [String: Any?] else {
             return
         }
@@ -3295,6 +3328,7 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
             configuration.userContentController.removeScriptMessageHandler(forName: "onCallAsyncJavaScriptResultBelowIOS14Received")
             configuration.userContentController.removeScriptMessageHandler(forName: "onWebMessagePortMessageReceived")
             configuration.userContentController.removeScriptMessageHandler(forName: "onWebMessageListenerPostMessageReceived")
+            configuration.userContentController.removeScriptMessageHandler(forName: "observe")
             configuration.userContentController.removeAllUserScripts()
             if #available(iOS 11.0, *) {
                 configuration.userContentController.removeAllContentRuleLists()
