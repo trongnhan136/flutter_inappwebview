@@ -94,6 +94,7 @@ import com.pichillilorenzo.flutter_inappwebview_android.types.WebViewAssetLoader
 import com.pichillilorenzo.flutter_inappwebview_android.webview.ContextMenuSettings;
 import com.pichillilorenzo.flutter_inappwebview_android.webview.InAppWebViewInterface;
 import com.pichillilorenzo.flutter_inappwebview_android.webview.JavaScriptBridgeInterface;
+import com.pichillilorenzo.flutter_inappwebview_android.webview.JavascriptContentInterface;
 import com.pichillilorenzo.flutter_inappwebview_android.webview.WebViewChannelDelegate;
 import com.pichillilorenzo.flutter_inappwebview_android.webview.web_message.WebMessageChannel;
 import com.pichillilorenzo.flutter_inappwebview_android.webview.web_message.WebMessageListener;
@@ -135,6 +136,10 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
   public WebViewChannelDelegate channelDelegate;
   @Nullable
   public JavaScriptBridgeInterface javaScriptBridgeInterface;
+
+  @Nullable
+  public JavascriptContentInterface javascriptContentInterface;
+
   public InAppWebViewSettings customSettings = new InAppWebViewSettings();
   public boolean isLoading = false;
   private boolean inFullscreen = false;
@@ -244,6 +249,10 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
 
     javaScriptBridgeInterface = new JavaScriptBridgeInterface(this);
     addJavascriptInterface(javaScriptBridgeInterface, JavaScriptBridgeJS.JAVASCRIPT_BRIDGE_NAME);
+
+
+    javascriptContentInterface = new JavascriptContentInterface(this);
+    addJavascriptInterface(javascriptContentInterface, "JSInterface");
 
     inAppWebViewChromeClient = new InAppWebViewChromeClient(plugin, this, inAppBrowserDelegate);
     setWebChromeClient(inAppWebViewChromeClient);
@@ -2089,6 +2098,10 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
     if (javaScriptBridgeInterface != null) {
       javaScriptBridgeInterface.dispose();
       javaScriptBridgeInterface = null;
+    }
+    if (javascriptContentInterface != null) {
+      javascriptContentInterface.dispose();
+      javascriptContentInterface = null;
     }
     plugin = null;
     loadUrl("about:blank");
