@@ -153,6 +153,12 @@ public class JavascriptContentInterface {
         sendToFlutter("onChangeLanguage", lang, null);
     }
 
+    @JavascriptInterface
+    public void closeWeb() {
+        sendToFlutter("closeWeb", null, null);
+    }
+
+
     private static String wrapToJsonStrings(String method, String arg1, String args2) {
         try {
             JSONArray array = new JSONArray();
