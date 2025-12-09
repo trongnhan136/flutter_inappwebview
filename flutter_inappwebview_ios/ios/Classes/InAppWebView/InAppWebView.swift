@@ -3409,7 +3409,6 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
 
 
 let MIN_SCALE: CGFloat = 1.0
-let MAX_SCALE: CGFloat = 3.0
 let MIDDLE_SCALE: CGFloat = 1.5
 
 extension InAppWebView {
@@ -3419,10 +3418,10 @@ extension InAppWebView {
     }
     
     func getMaxScale() -> CGFloat {
-        if let _setting = self.settings {
+        if let _setting = self.settings, _setting.zoomEnable {
             return _setting.maximumZoomScale
         }
-        return MAX_SCALE
+        return 1.0
     }
     
     @objc func doubleTapForZoom(tap: UITapGestureRecognizer) {
