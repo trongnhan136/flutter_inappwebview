@@ -21,6 +21,8 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
       mediaPlaybackRequiresUserGesture: false,
       allowsInlineMediaPlayback: true,
       iframeAllow: "camera; microphone",
+      maximumZoomScale: 5,
+      zoomEnable: true,
       iframeAllowFullscreen: true);
 
   PullToRefreshController? pullToRefreshController;
@@ -115,8 +117,8 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
                 InAppWebView(
                   key: webViewKey,
                   webViewEnvironment: webViewEnvironment,
-                  initialUrlRequest:
-                      URLRequest(url: WebUri('https://flutter.dev')),
+                  initialUrlRequest: URLRequest(
+                      url: WebUri('https://google.com')), //https://flutter.dev
                   // initialUrlRequest:
                   // URLRequest(url: WebUri(Uri.base.toString().replaceFirst("/#/", "/") + 'page.html')),
                   // initialFile: "assets/index.html",

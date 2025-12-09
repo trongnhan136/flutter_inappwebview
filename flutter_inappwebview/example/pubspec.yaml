@@ -54,10 +54,10 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   # integration_test: ^1.0.2+1
-#  integration_test:
-#    git:
-#      url: https://github.com/flutter/plugins.git
-#      path: packages/integration_test
+  #  integration_test:
+  #    git:
+  #      url: https://github.com/flutter/plugins.git
+  #      path: packages/integration_test
   flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
@@ -65,7 +65,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
