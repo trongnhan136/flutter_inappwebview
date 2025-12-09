@@ -69,6 +69,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     fileprivate var interceptOnlyAsyncAjaxRequestsPluginScript: PluginScript?
     
+    
+    var heightContent: CGFloat = 0
+    fileprivate var doubleTapRecognizer: UITapGestureRecognizer?
+    
     init(id: Any?, plugin: SwiftFlutterPlugin?, frame: CGRect, configuration: WKWebViewConfiguration,
          contextMenu: [String: Any]?, userScripts: [UserScript] = []) {
         super.init(frame: frame, configuration: configuration)
@@ -146,6 +150,21 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             nativeLongPressRecognizer.removeTarget(nil, action: nil)
             nativeLongPressRecognizer.addTarget(self, action: #selector(self.longPressGestureDetected))
         }
+        
+        if self.enableDoubleToZoom() {
+            if let doubleTap =  tapgestureRecognizerWithDescriptionFragment("action=_doubleTapRecognizedForDoubleClick:"),
+                let parentDoubleView = doubleTap.view {
+                
+                self.doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTapForZoom))
+                self.doubleTapRecognizer!.numberOfTapsRequired = 2
+                self.doubleTapRecognizer!.numberOfTouchesRequired = 1
+                
+                self.doubleTapRecognizer!.cancelsTouchesInView = false
+                self.doubleTapRecognizer!.delaysTouchesEnded = false
+                self.doubleTapRecognizer!.delaysTouchesBegan = false
+                parentDoubleView.addGestureRecognizer(self.doubleTapRecognizer!)
+            }
+        }
     }
     
     private func gestureRecognizerWithDescriptionFragment(_ descriptionFragment: String) -> UILongPressGestureRecognizer? {
@@ -153,6 +172,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             return (($0 as? UILongPressGestureRecognizer) != nil) && $0.description.contains(descriptionFragment)
         })
         return result as? UILongPressGestureRecognizer
+    }
+    
+    private func tapgestureRecognizerWithDescriptionFragment(_ descriptionFragment: String) -> UITapGestureRecognizer? {
+        let result = self.scrollView.subviews.compactMap({ $0.gestureRecognizers }).joined().first(where: {
+            return (($0 as? UITapGestureRecognizer) != nil) && $0.description.contains(descriptionFragment)
+        })
+        return result as? UITapGestureRecognizer
     }
     
     @objc func longPressGestureDetected(_ sender: UIGestureRecognizer) {
@@ -2516,6 +2542,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func onContentSizeChanged(oldContentSize: CGSize) {
         channelDelegate?.onContentSizeChanged(oldContentSize: oldContentSize,
                                               newContentSize: scrollView.contentSize)
+        
+        // on content Size changed
+        self.heightContent = scrollView.contentSize.height
+        
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -3344,6 +3374,14 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
         longPressRecognizer.removeTarget(self, action: #selector(longPressGestureDetected))
         longPressRecognizer.delegate = nil
         scrollView.removeGestureRecognizer(longPressRecognizer)
+        
+        doubleTapRecognizer?.removeTarget(self, action: #selector(doubleTapForZoom))
+        doubleTapRecognizer?.delegate = nil
+        if let _ = doubleTapRecognizer {
+            scrollView.removeGestureRecognizer(doubleTapRecognizer!)
+        }
+        
+        
         recognizerForDisablingContextMenuOnLinks.removeTarget(self, action: #selector(longPressGestureDetected))
         recognizerForDisablingContextMenuOnLinks.delegate = nil
         scrollView.removeGestureRecognizer(recognizerForDisablingContextMenuOnLinks)
@@ -3368,3 +3406,67 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
         debugPrint("InAppWebView - dealloc")
     }
 }
+
+
+let MIN_SCALE: CGFloat = 1.0
+let MAX_SCALE: CGFloat = 3.0
+let MIDDLE_SCALE: CGFloat = 1.5
+
+extension InAppWebView {
+    
+    @objc func enableDoubleToZoom() -> Bool {
+        return self.settings?.zoomEnable ?? false
+    }
+    
+    func getMaxScale() -> CGFloat {
+        if let _setting = self.settings {
+            return _setting.maximumZoomScale
+        }
+        return MAX_SCALE
+    }
+    
+    @objc func doubleTapForZoom(tap: UITapGestureRecognizer) {
+        let zoomScaleCurrent = self.scrollView.zoomScale
+
+        if zoomScaleCurrent < MIDDLE_SCALE {
+            self.zoomWebView(tap: tap, scale: self.getMaxScale())
+        } else if zoomScaleCurrent <= self.getMaxScale() && zoomScaleCurrent > MIDDLE_SCALE {
+            self.zoomWebView(tap: tap, scale: MIN_SCALE)
+        } else {
+            self.zoomWebView(tap: tap, scale: MIN_SCALE)
+        }
+    }
+    
+    @objc func zoomWebView(tap: UITapGestureRecognizer, scale: CGFloat){
+        let center = tap.location(in:self.scrollView)
+        if center.y >= 0 && center.y <= self.heightContent {
+            let scrollSize = self.scrollView.frame.size
+            let newCenter = center
+            var zoomRect = CGRect.zero
+            
+            let width = scrollSize.width / scale
+            let height = scrollSize.height / scale
+            zoomRect = zoomRect.copy(width: width, height: height)
+            let deltaX = newCenter.x - (zoomRect.size.width / 2)
+            let deltaY = newCenter.y - (zoomRect.size.height / 2)
+            
+            zoomRect = CGRect(x: deltaX, y: deltaY, width: width, height: height)
+            self.scrollView.zoom(to: zoomRect, animated: true)
+        }
+    }
+}
+
+
+extension CGRect {
+    func copy(x: CGFloat? = nil, y: CGFloat? = nil, width: CGFloat? = nil, height: CGFloat? = nil) -> CGRect {
+        let newX = x ?? self.origin.x
+        let newY = y ?? self.origin.y
+        let newWidth = width ?? self.size.width
+        let newHeight = height ?? self.size.height
+        
+        return CGRect(x: newX, y: newY, width: newWidth, height: newHeight)
+    }
+}
+
+
+
