@@ -41,7 +41,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
 
     var disallowOverScroll = false
     var enableViewportScale = false
-    var zoomEnable = false
+    var doubleTapToZoom = false
     var suppressesIncrementalRendering = false
     var allowsAirPlayForMediaPlayback = true
     var allowsBackForwardNavigationGestures = true

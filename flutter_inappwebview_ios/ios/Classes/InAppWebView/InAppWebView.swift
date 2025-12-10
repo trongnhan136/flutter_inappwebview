@@ -3414,11 +3414,11 @@ let MIDDLE_SCALE: CGFloat = 1.5
 extension InAppWebView {
     
     @objc func enableDoubleToZoom() -> Bool {
-        return self.settings?.zoomEnable ?? false
+        return (self.settings?.doubleTapToZoom ?? false) && (self.settings?.supportZoom ?? false)
     }
     
     func getMaxScale() -> CGFloat {
-        if let _setting = self.settings, _setting.zoomEnable {
+        if let _setting = self.settings, self.enableDoubleToZoom() {
             return _setting.maximumZoomScale
         }
         return 1.0

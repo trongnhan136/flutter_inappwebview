@@ -308,9 +308,9 @@ because there isn't any way to make the website data store non-persistent for th
     IOSPlatform(),
     MacOSPlatform(),
     WindowsPlatform(
-      apiName: "ICoreWebView2ControllerOptions.put_IsInPrivateModeEnabled",
-      apiUrl: "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controlleroptions?view=webview2-1.0.2792.45#put_isinprivatemodeenabled"
-    )
+        apiName: "ICoreWebView2ControllerOptions.put_IsInPrivateModeEnabled",
+        apiUrl:
+            "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controlleroptions?view=webview2-1.0.2792.45#put_isinprivatemodeenabled")
   ])
   bool? incognito;
 
@@ -368,6 +368,8 @@ because there isn't any way to make the website data store non-persistent for th
             "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2settings?view=webview2-1.0.2210.55#put_iszoomcontrolenabled")
   ])
   bool? supportZoom;
+
+  bool? doubleTapToZoom;
 
   ///Sets whether cross-origin requests in the context of a file scheme URL should be allowed to access content from other file scheme URLs.
   ///Note that some accesses such as image HTML elements don't follow same-origin rules and aren't affected by this setting.
@@ -1683,6 +1685,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.disableHorizontalScroll = false,
     this.disableContextMenu = false,
     this.supportZoom = true,
+    this.doubleTapToZoom = false,
     this.allowFileAccessFromFileURLs = false,
     this.allowUniversalAccessFromFileURLs = false,
     this.textZoom = 100,
@@ -1999,6 +2002,8 @@ class InAppWebViewOptions
   ///Set to `false` if the WebView should not support zooming using its on-screen zoom controls and gestures. The default value is `true`.
   bool supportZoom;
 
+  bool doubleTapToZoom;
+
   ///Sets whether cross-origin requests in the context of a file scheme URL should be allowed to access content from other file scheme URLs.
   ///Note that some accesses such as image HTML elements don't follow same-origin rules and aren't affected by this setting.
   ///
@@ -2046,6 +2051,7 @@ class InAppWebViewOptions
       this.disableHorizontalScroll = false,
       this.disableContextMenu = false,
       this.supportZoom = true,
+      this.doubleTapToZoom = false,
       this.allowFileAccessFromFileURLs = false,
       this.allowUniversalAccessFromFileURLs = false}) {
     if (this.minimumFontSize == null)
@@ -2086,6 +2092,7 @@ class InAppWebViewOptions
       "disableHorizontalScroll": disableHorizontalScroll,
       "disableContextMenu": disableContextMenu,
       "supportZoom": supportZoom,
+      "doubleTapToZoom": doubleTapToZoom,
       "allowFileAccessFromFileURLs": allowFileAccessFromFileURLs,
       "allowUniversalAccessFromFileURLs": allowUniversalAccessFromFileURLs
     };
@@ -2132,6 +2139,7 @@ class InAppWebViewOptions
     instance.disableHorizontalScroll = map["disableHorizontalScroll"];
     instance.disableContextMenu = map["disableContextMenu"];
     instance.supportZoom = map["supportZoom"];
+    instance.doubleTapToZoom = map["doubleTapToZoom"];
     instance.allowFileAccessFromFileURLs = map["allowFileAccessFromFileURLs"];
     instance.allowUniversalAccessFromFileURLs =
         map["allowUniversalAccessFromFileURLs"];

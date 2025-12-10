@@ -22,7 +22,7 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
       allowsInlineMediaPlayback: true,
       iframeAllow: "camera; microphone",
       maximumZoomScale: 5,
-      zoomEnable: true,
+      doubleTapToZoom: true,
       iframeAllowFullscreen: true);
 
   PullToRefreshController? pullToRefreshController;
