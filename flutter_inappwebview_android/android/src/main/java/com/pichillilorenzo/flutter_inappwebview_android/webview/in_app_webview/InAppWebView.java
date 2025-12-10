@@ -144,6 +144,7 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
   public boolean isLoading = false;
   private boolean inFullscreen = false;
   public float zoomScale = 1.0f;
+  public float maxZoomScale = 3.0f;
   public ContentBlockerHandler contentBlockerHandler = new ContentBlockerHandler();
   public Pattern regexToCancelSubFramesLoadingCompiled;
   @Nullable
@@ -471,6 +472,27 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
     });
 
     gestureDetector = new GestureDetector(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
+      @Override
+      public boolean onDoubleTap(@NonNull MotionEvent e) {
+        if(customSettings.doubleTapToZoom){
+          float targetZoom = zoomScale > 1.0f ? 1.0f : maxZoomScale;
+
+          // Tính toán vị trí zoom
+          float x = e.getX() / getWidth();
+          float y = e.getY() / getHeight();
+
+          zoomBy(targetZoom / zoomScale);
+          zoomScale = targetZoom;
+
+          return true;
+        }else{
+          return super.onDoubleTap(e);
+        }
+      }
+      public boolean onDoubleTapEvent(MotionEvent e) {
+        return true;
+      }
+
       @Override
       public boolean onSingleTapUp(MotionEvent ev) {
         if (floatingContextMenu != null) {
@@ -1494,6 +1516,7 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
 
   @Override
   public boolean onTouchEvent(MotionEvent ev) {
+    gestureDetector.onTouchEvent(ev);
     lastTouch = new Point((int) ev.getX(), (int) ev.getY());
 
     ViewParent parent = getParent();

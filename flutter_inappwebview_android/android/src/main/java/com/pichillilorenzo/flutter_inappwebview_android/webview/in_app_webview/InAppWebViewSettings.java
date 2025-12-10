@@ -57,6 +57,7 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
   public Boolean disableHorizontalScroll = false;
   public Boolean disableContextMenu = false;
   public Boolean supportZoom = true;
+  public Boolean doubleTapToZoom = false;
   public Boolean allowFileAccessFromFileURLs = false;
   public Boolean allowUniversalAccessFromFileURLs = false;
   public Boolean allowBackgroundAudioPlaying = false;
@@ -412,6 +413,9 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
         case "requestedWithHeaderOriginAllowList":
           requestedWithHeaderOriginAllowList = new HashSet<>((List<String>) value);
           break;
+        case "doubleTapToZoom":
+          doubleTapToZoom = (Boolean) value;
+          break;
       }
     }
 
@@ -451,6 +455,7 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
     settings.put("builtInZoomControls", builtInZoomControls);
     settings.put("displayZoomControls", displayZoomControls);
     settings.put("supportZoom", supportZoom);
+    settings.put("doubleTapToZoom", doubleTapToZoom);
     settings.put("databaseEnabled", databaseEnabled);
     settings.put("domStorageEnabled", domStorageEnabled);
     settings.put("useWideViewPort", useWideViewPort);
